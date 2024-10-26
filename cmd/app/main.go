@@ -35,6 +35,7 @@ func main() {
 
 	// Define a simple hello world handler
 	r.HandleFunc("/post", handlers.CreatePost).Methods("Post")
+	r.HandleFunc("/api/posts/{postId}/comments", handlers.AddCommentToPost).Methods("POST")
 
 	// Start the server on port 8080
 	if err := http.ListenAndServe(":8080", r); err != nil {

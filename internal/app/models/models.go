@@ -7,6 +7,7 @@ import (
 type Model interface {
 	TableName() string
 	Fields() []FieldInfo
+	Constraints() []string
 }
 
 // FieldInfo struct for holding information about model fields
@@ -32,9 +33,13 @@ func (Post) Fields() []FieldInfo {
 		{Name: "id", Type: "TEXT PRIMARY KEY"},
 		{Name: "caption", Type: "TEXT"},
 		{Name: "image_url", Type: "TEXT"},
-		{Name: "created_at", Type: "TIMESTAMP"},
-		{Name: "updated_at", Type: "TIMESTAMP"},
+		{Name: "created_at", Type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"},
+		{Name: "updated_at", Type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"},
 	}
+}
+
+func (Post) Constraints() []string {
+	return []string{}
 }
 
 type Comment struct {
@@ -42,6 +47,7 @@ type Comment struct {
 	Content   string    `json:"content" db:"content"`
 	Creator   string    `json:"creator" db:"creator"`
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
 
 func (Comment) TableName() string {
@@ -51,9 +57,17 @@ func (Comment) TableName() string {
 func (Comment) Fields() []FieldInfo {
 	return []FieldInfo{
 		{Name: "id", Type: "TEXT PRIMARY KEY"},
+		{Name: "post_id", Type: "TEXT"},
 		{Name: "content", Type: "TEXT"},
 		{Name: "creator", Type: "TEXT"},
-		{Name: "created_at", Type: "TIMESTAMP"},
+		{Name: "created_at", Type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"},
+		{Name: "updated_at", Type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"},
+	}
+}
+
+func (Comment) Constraints() []string {
+	return []string{
+		"FOREIGN KEY(post_id) REFERENCES posts(id)",
 	}
 }
 

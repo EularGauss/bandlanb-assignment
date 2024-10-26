@@ -37,4 +37,54 @@ For the sake of completeness and complete view of the design, customer profile i
 | updated_at  | DATETIME          | Default CURRENT_TIMESTAMP ON  UPDATE CURRENT_TIMESTAMP | The timestamp when the comment was updated |
 
 
+# User interactions
+## User create a post
+POST /posts
+```json
+{
+    "caption": "This is a caption",
+    "image": "true"
+}
+```
+Headers
+```headers
+Authorization
+JWT <token> (includes user-id)
+```
+```response
+{
+    "id": 1,
+    "caption": "This is a caption",
+    "image": <presigned-url>
+}
+```
+* User immediately gets a presigned url to upload the image
+* Client side handles the logic to upload the image to the presigned url
+* Image is uploaded using multipart/form-data
+
+User requests a post
+GET /posts
+```request
+{
+    "id": <id of the post in case of specific post retrieval>
+    "number_of_posts": <number of posts to fetch>
+    "cursor": <id of the last post fetched>
+}
+```
+```response
+[{
+    "id": 1,
+    "caption": "This is a caption",
+    "image": <presigned-url>
+}]
+```
+
+## User comments on a post
+POST /api/posts/{postId}/comments
+```json
+{
+    "comment": "This is a comment",
+}
+```
+
 
