@@ -3,16 +3,16 @@ package database
 import (
 	"database/sql"
 	"github.com/EularGauss/bandlab-assignment/internal/app/models"
-	"log"
 	"strings"
 )
 
-func Connect(db_name string) *sql.DB {
+var db_conn *sql.DB = nil
+
+func Connect(db_name string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", db_name)
-	if err != nil {
-		log.Fatal("Failed to connect to the database:", err)
-	}
-	return db
+	if db_conn
+	db_conn = db
+	return db, err
 }
 
 func Migrate(db *sql.DB) error {
@@ -28,4 +28,8 @@ func Migrate(db *sql.DB) error {
 		}
 	}
 	return nil
+}
+
+func GetDB() *sql.DB {
+	return db
 }

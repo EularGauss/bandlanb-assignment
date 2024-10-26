@@ -1,9 +1,9 @@
-package services
+package handlers
 
 import (
-	"bandlab-assignment/models"
 	"encoding/json"
 	"fmt"
+	"github.com/EularGauss/bandlab-assignment/internal/app/models"
 	"github.com/google/uuid"
 	"net/http"
 	"sync"
@@ -54,6 +54,5 @@ func GetAllPosts(w http.ResponseWriter, r *http.Request) {
 
 func generateID() string {
 	id := uuid.New()
-	postIDCounter++
 	return fmt.Sprintf("post-%d", id)
 }
