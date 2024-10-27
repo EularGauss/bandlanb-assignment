@@ -1,5 +1,6 @@
 # Architecture
-![Architecture Image](https://github.com/user-attachments/assets/8deb041e-f08b-452e-b2d9-61fc4f5f71db)
+![Architecture Image](https://github.com/user-attachments/assets/f08ec768-511e-4735-a303-e6527ec5f8f5)
+
 
 
 # User profile
