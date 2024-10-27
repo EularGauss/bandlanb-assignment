@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"github.com/EularGauss/bandlab-assignment/internal/app/models"
+	"github.com/EularGauss/bandlab-assignment/internal/app/database/models"
 	"strings"
 	"sync"
 )

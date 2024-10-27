@@ -27,6 +27,25 @@ func storeCommentToDB(postId string, comment Comment) error {
 	return err
 }
 
+func deleteCommentFromDB(commentID, postID string) error {
+	db := database.GetDB()
+	if db == nil {
+		return fmt.Errorf("database connection is nil")
+	}
+	defer db.Close()
+
+	// Prepare the SQL statement for deleting a comment
+	stmt, err := db.Prepare("DELETE FROM comments WHERE id = ? AND postId = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	// Execute the SQL statement with the comment ID
+	_, err = stmt.Exec(commentID, postID)
+	return err
+}
+
 func AddCommentToPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -54,4 +73,21 @@ func AddCommentToPost(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(commentInput)
+}
+
+func DeleteComment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Extract comment ID from the URL parameters
+	commentID := mux.Vars(r)["commentId"] // Assuming you're using Gorilla Mux for routing
+	postID := mux.Vars(r)["postId"]       // Assuming you also pass postId in the URL
+
+	// Call the function to delete the comment from the database
+	err := deleteCommentFromDB(commentID, postID)
+	if err != nil {
+		http.Error(w, "Failed to delete the comment", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // No content returned on successful deletion
 }

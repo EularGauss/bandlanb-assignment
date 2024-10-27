@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/EularGauss/bandlab-assignment/internal/app/database"
-	"github.com/EularGauss/bandlab-assignment/internal/app/models"
+	"github.com/EularGauss/bandlab-assignment/internal/app/database/models"
 	"net/http"
 )
 
@@ -64,4 +64,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 	// Return the created post
 	w.WriteHeader(http.StatusCreated)
+}
+
+func GetPost() {
+
 }
