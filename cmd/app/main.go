@@ -34,7 +34,8 @@ func main() {
 	r := mux.NewRouter()
 
 	// Define a simple hello world handler
-	r.HandleFunc("/post", handlers.CreatePost).Methods("Post")
+	r.HandleFunc("/post", handlers.CreatePost).Methods("POST")
+	r.HandleFunc("/post", handlers.GetPosts).Methods("GET")
 	r.HandleFunc("/api/posts/{postId}/comments", handlers.AddCommentToPost).Methods("POST")
 	r.HandleFunc("/api/posts/{postId}/comments/{commentId}", handlers.DeleteComment).Methods("DELETE")
 
