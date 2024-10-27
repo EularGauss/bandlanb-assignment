@@ -88,3 +88,18 @@ POST /api/posts/{postId}/comments
 ```
 
 
+# Handling uploads
+* In order to handle the high bandwidth requirement of the image uploads, I decided to use s3 presigned URLs.
+* In order to control the allowed file types to upload, we need to setup the bucket policy to now allow upload more than 100 MB
+* Still customer can provide corrupt file or file with wrong extension.
+* We can implement a logic in client side to pass on some part of the file being uploaded
+* Server side will hash the input (MD5 hash) and set that in the metadata of the presigned URL
+* Worker group will recalculate the hash before processing the file and compare it with the hash in the metadata
+* If they don't match delete the file and return an error
+* We can also do signature verification on the file to make sure it's not tampered with
+
+# production deployment
+* we need to add user authentication and authorization in existing workflow
+* Lambda function is required to be limited in terms of capacity so that in case the file is corrupt and has worm embedded, it doesn't affect the system
+* Posts and comments are required to be horizontally scalable
+
