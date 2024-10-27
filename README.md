@@ -83,7 +83,7 @@ GET /posts
 POST /api/posts/{postId}/comments
 ```json
 {
-    "comment": "This is a comment",
+    "comment": "This is a comment"
 }
 ```
 
