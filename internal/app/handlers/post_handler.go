@@ -15,6 +15,11 @@ type PostInput struct {
 	LoadImage bool   `json:"image"`
 }
 
+type PostOutput struct{
+	ID string `json:"id"`
+	PreSignedURL string `json:"preSignedURL"`
+}
+
 type PostWithComments struct {
 	Caption   string    `json:"caption"`
 	ImageURL  string    `json:"imageUrl"`
@@ -29,7 +34,7 @@ type Comment struct {
 }
 
 func storePostToDB(post *models.Post) error {
-	db := database.GetDB() // Assuming GetDB function is defined elsewhere
+	db := database.GetDB()
 	if db == nil {
 		return fmt.Errorf("database connection is nil")
 	}
@@ -93,16 +98,14 @@ func fetchPostsFromDB(limit int, cursor string) ([]PostWithComments, string, err
 	var posts []PostWithComments
 	var nextCursor string // For cursor-based pagination
 
-	// Iterate through the rows
 	for rows.Next() {
 		var post PostWithComments
-		var lastComments string // Temporary variable to hold JSON result of last comments
+		var lastComments string
 
 		if err := rows.Scan(&post.Caption, &post.ImageURL, &lastComments); err != nil {
 			return nil, "", err
 		}
 
-		// Unmarshal the JSON string of last comments into the Comments slice
 		if lastComments != "" {
 			if err := json.Unmarshal([]byte(lastComments), &post.Comments); err != nil {
 				return nil, "", err
@@ -124,7 +127,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	var postInput PostInput
 
-	// Decode the request body into the PostInput struct
 	if err := json.NewDecoder(r.Body).Decode(&postInput); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
@@ -134,25 +136,36 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Caption not provided")
 		return
 	}
-	// Create a new Post instance
+
 	newPost := models.Post{
-		ID:      generateID(), // Implement this function to generate a unique ID
+		ID:      generateID(),
 		Caption: postInput.Caption,
 	}
+
+	presignedURL := ""
+	if postInput.LoadImage == true {
+		s3Service := GetS3Service()
+		presignedURL, err := s3Service.GeneratePresignedURL(postInput.ImageKey)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Failed to generate presigned URL")
+			return
+		}
+	}
+
 	if err := storePostToDB(&newPost); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to store post")
 		return
 	}
-	// Return the created post
+	output := PostOutput{ID: newPost.ID, PreSignedURL: presignedURL}
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(output)
 }
 
 func GetPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Read query parameters for pagination
-	limitStr := r.URL.Query().Get("limit")   // Number of posts to retrieve
-	cursorStr := r.URL.Query().Get("cursor") // Cursor for pagination
+	limitStr := r.URL.Query().Get("limit")
+	cursorStr := r.URL.Query().Get("cursor")
 
 	limit := 10 // Default limit if not specified
 	if limitStr != "" {

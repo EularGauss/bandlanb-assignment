@@ -1,5 +1,6 @@
+// This is a model to show how we can make a connection to db
+// This is basic implementation of ORM model. it is intentionally kept simple to show how we can use ORM model
 package models
-
 import (
 	"time"
 )
@@ -10,7 +11,7 @@ type Model interface {
 	Constraints() []string
 }
 
-// FieldInfo struct for holding information about model fields
+
 type FieldInfo struct {
 	Name string
 	Type string
@@ -20,6 +21,7 @@ type Post struct {
 	ID        string    `json:"id" db:"id"`
 	Caption   string    `json:"caption" db:"caption"`
 	ImageURL  string    `json:"imageUrl" db:"image_url"`
+	UserID    string    `json:"userId" db:"user_id"`
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
@@ -35,9 +37,12 @@ func (Post) Fields() []FieldInfo {
 		{Name: "image_url", Type: "TEXT"},
 		{Name: "created_at", Type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"},
 		{Name: "updated_at", Type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"},
+		{Name: "user_id", Type: "INTEGER"},
 	}
 }
 
+
+//TODO Add foreign key constraint for user_id
 func (Post) Constraints() []string {
 	return []string{}
 }

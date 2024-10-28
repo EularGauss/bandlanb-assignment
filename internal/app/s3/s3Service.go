@@ -2,6 +2,7 @@ package s3service
 
 import (
 	"fmt"
+	"sync"
 	"github.com/EularGauss/bandlab-assignment/internal/app"
 	"strings"
 	"time"
@@ -11,15 +12,29 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-// S3ServiceImpl represents the S3 service
 type S3ServiceImpl struct {
 	Bucket string
+}
+
+var s3Service *S3ServiceImpl
+var mu sync.Mutex = sync.Mutex{}
+
+func GetS3Service() *S3ServiceImpl {
+	mu.Lock()
+	config := DefaultS3Config()
+	if s3Service == nil {
+		s3Service = &S3ServiceImpl{
+			Bucket: DefaultS3Config(),
+		}
+	}
+	mu.Unlock()
+	return s3Service
 }
 
 // GeneratePresignedURL generates a pre-signed URL for uploading an image to S3
 func (s *S3ServiceImpl) GeneratePresignedURL(key string) (string, error) {
 	// Check for allowed file extensions
-	allowedExtensions := []string{".jpg", ".jpeg", ".bmp"}    // Added .jpeg for better compatibility
+	allowedExtensions := []string{".jpg", ".jpeg", ".bmp"}
 	ext := strings.ToLower(key[strings.LastIndex(key, "."):]) // Extract the file extension
 
 	if !contains(allowedExtensions, ext) {
@@ -46,7 +61,7 @@ func (s *S3ServiceImpl) GeneratePresignedURL(key string) (string, error) {
 	}
 
 	// Set expiration for the URL
-	url, err := req.Presign(time.Duration(s3_config.PreSignedURLExpiration) * time.Minute) // URL is valid for x minutes
+	url, err := req.Presign(time.Duration(s3_config.PreSignedURLExpiration) * time.Minute)
 	if err != nil {
 		return "", err
 	}

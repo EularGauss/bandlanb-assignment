@@ -21,27 +21,26 @@ func Connect(db_name string) (*sql.DB, error) {
 	return db, err
 }
 
+// Migrate creates tables in the database
 func Migrate(db *sql.DB) error {
 	for _, model := range models.RegisteredModels {
 
-		// Get the table name and fields for the model
 		tableName := model.TableName()
 		fields := model.Fields()
 
-		// Build the fields part of the CREATE TABLE statement
 		var fieldDefinitions []string
 		for _, field := range fields {
 			fieldDefinitions = append(fieldDefinitions, fmt.Sprintf("%s %s", field.Name, field.Type))
 		}
 
-		// Get any constraints for the model
 		constraints := model.Constraints()
 		var constraintsDefinition string
 		if len(constraints) > 0 {
 			constraintsDefinition = strings.Join(constraints, ", ")
 		}
 
-		// Create the SQL statement
+		// TODO check if the tables exists already, if so, skip creating the table
+		// Reason being that if there are multiple services running, they might try to create the table at the same time
 		var sql string
 		if constraintsDefinition != "" {
 			sql = fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s, %s);", tableName, strings.Join(fieldDefinitions, ", "), constraintsDefinition)
@@ -49,7 +48,6 @@ func Migrate(db *sql.DB) error {
 			sql = fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", tableName, strings.Join(fieldDefinitions, ", "))
 		}
 
-		// Execute the SQL statement
 		_, err := db.Exec(sql)
 		if err != nil {
 			return fmt.Errorf("failed to create table %s: %w", tableName, err)
@@ -58,6 +56,7 @@ func Migrate(db *sql.DB) error {
 	return nil
 }
 
+// TODO add connection pool library
 func GetDB() *sql.DB {
 	db, err := Connect("test.db")
 	if err != nil {
