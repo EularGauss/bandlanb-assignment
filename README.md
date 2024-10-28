@@ -1,5 +1,8 @@
 # Architecture
-![Architecture Image](https://github.com/user-attachments/assets/8deb041e-f08b-452e-b2d9-61fc4f5f71db)
+![Architecture Image](https://github.com/user-attachments/assets/3cc5ffaf-363b-4ffb-a379-406e2a92bc8e)
+
+
+
 
 
 # User profile
@@ -87,7 +90,7 @@ POST /api/posts/{postId}/comments
 ```
 
 
-# Handling uploads
+# Handling image uploads
 * In order to handle the high bandwidth requirement of the image uploads, I decided to use s3 presigned URLs.
 * In order to control the allowed file types to upload, we need to setup the bucket policy to now allow upload more than 100 MB
 * Still customer can provide corrupt file or file with wrong extension.
@@ -96,6 +99,9 @@ POST /api/posts/{postId}/comments
 * Worker group will recalculate the hash before processing the file and compare it with the hash in the metadata
 * If they don't match delete the file and return an error
 * We can also do signature verification on the file to make sure it's not tampered with
+![Upload flow](https://github.com/user-attachments/assets/c024c586-550e-4ce8-b049-210048b4ec7c)
+
+  
 
 # production deployment
 * we need to add user authentication and authorization in existing workflow
