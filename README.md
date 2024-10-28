@@ -91,7 +91,7 @@ POST /api/posts/{postId}/comments
 ```
 
 
-# Handling uploads
+# Handling image uploads
 * In order to handle the high bandwidth requirement of the image uploads, I decided to use s3 presigned URLs.
 * In order to control the allowed file types to upload, we need to setup the bucket policy to now allow upload more than 100 MB
 * Still customer can provide corrupt file or file with wrong extension.
