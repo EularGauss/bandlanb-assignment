@@ -119,5 +119,6 @@ POST /api/posts/{postId}/comments
 * Posts and comments are required to be horizontally scalable
 * Add Unit test and integration test to the code
 * We can use ECS service to deploy our services in containers and add autoscaling rules to scale the services
+* Current implementation is using a single connection to db. We can use connection pooling to handle multiple connections 
 
 
