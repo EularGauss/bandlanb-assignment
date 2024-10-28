@@ -67,18 +67,25 @@ JWT <token> (includes user-id)
 User requests a post
 GET /posts
 ```request
+body
 {
-    "id": <id of the post in case of specific post retrieval>
-    "number_of_posts": <number of posts to fetch>
-    "cursor": <id of the last post fetched>
+    "limit": <number of posts to retrieve>,
+    "cursor": <timestamp of the last post>
 }
 ```
 ```response
-[{
-    "id": 1,
-    "caption": "This is a caption",
-    "image": <presigned-url>
-}]
+
+    "id": <id of the post in case of specific post retrieval>
+    "caption": <caption attached with the post>
+    "image_url": <jpg image of the URL>
+    "comments": [
+        {
+            "id": <id of the comment>,
+            "comment": <comment attached with the post>
+        }
+    ],
+    "created_at": <timestamp of the last post, used for cursor pagination>
+}
 ```
 
 ## User comments on a post
@@ -107,4 +114,7 @@ POST /api/posts/{postId}/comments
 * we need to add user authentication and authorization in existing workflow
 * Lambda function is required to be limited in terms of capacity so that in case the file is corrupt and has worm embedded, it doesn't affect the system
 * Posts and comments are required to be horizontally scalable
+* Add Unit test and integration test to the code
+* We can use ECS service to deploy our services in containers and add autoscaling rules to scale the services
+
 

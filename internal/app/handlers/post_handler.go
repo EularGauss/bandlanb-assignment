@@ -21,6 +21,7 @@ type PostOutput struct{
 }
 
 type PostWithComments struct {
+	ID 		string `json:"id"`
 	Caption   string    `json:"caption"`
 	ImageURL  string    `json:"imageUrl"`
 	Comments  []Comment `json:"comments"`
@@ -38,7 +39,6 @@ func storePostToDB(post *models.Post) error {
 	if db == nil {
 		return fmt.Errorf("database connection is nil")
 	}
-	defer db.Close()
 
 	// Prepare the SQL statement
 	stmt, err := db.Prepare("INSERT INTO posts (id, caption) VALUES (?, ?)")
@@ -57,14 +57,13 @@ func fetchPostsFromDB(limit int, cursor string) ([]PostWithComments, string, err
 	if db == nil {
 		return nil, "", fmt.Errorf("database connection is nil")
 	}
-	defer db.Close()
 
 	var query string
 	if cursor != "" {
 		query = `
-            SELECT p.caption, p.image_url, 
+            SELECT p.id, p.caption, p.image_url, 
                 (SELECT json_group_array(json_object('content', c.content))
-                 FROM (SELECT c.content 
+                 FROM (SELECT c.id, c.content 
                      FROM comments c 
                      WHERE c.post_id = p.id 
                      ORDER BY c.created_at DESC 
@@ -77,9 +76,9 @@ func fetchPostsFromDB(limit int, cursor string) ([]PostWithComments, string, err
             LIMIT ?`
 	} else {
 		query = `
-            SELECT p.caption, p.image_url, 
+            SELECT p.id, p.caption, p.image_url, 
                 (SELECT json_group_array(json_object('content', c.content))
-                 FROM (SELECT c.content 
+                 FROM (SELECT c.id, c.content 
                      FROM comments c 
                      WHERE c.post_id = p.id 
                      ORDER BY c.created_at DESC 
@@ -118,7 +117,6 @@ func fetchPostsFromDB(limit int, cursor string) ([]PostWithComments, string, err
 		nextCursor = post.CreatedAt.Format(time.RFC3339)
 	}
 
-	// Return retrieved posts and the next cursor value
 	return posts, nextCursor, nil
 }
 
