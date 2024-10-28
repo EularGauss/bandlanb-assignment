@@ -15,6 +15,10 @@ type CommentInput struct {
 	Creator string `json:"creator"`
 }
 
+type CommentOutput struct{
+	ID string `json:"id"`
+}
+
 func storeCommentToDB(comment *CommentInput, userId string) error {
 	db := database.GetDB()
 	if db == nil {
@@ -26,9 +30,9 @@ func storeCommentToDB(comment *CommentInput, userId string) error {
 		return err
 	}
 	defer stmt.Close()
-
-	_, err = stmt.Exec(generateID(), comment.Content, comment.Creator, comment.PostId)
-	return err
+	id := generateID()
+	_, err = stmt.Exec(id, comment.Content, comment.Creator, comment.PostId)
+	return id, err
 }
 
 func deleteCommentFromDB(commentID, postID string) error {
@@ -64,13 +68,13 @@ func AddCommentToPost(w http.ResponseWriter, r *http.Request) {
 
 	userId := "annonymous" // getch userid from jwt token in production
 
-	if err := storeCommentToDB(&commentInput, userId); err != nil {
+	if id, err := storeCommentToDB(&commentInput, userId); err != nil {
 		http.Error(w, "Failed to store the comment", http.StatusInternalServerError)
 		return
+	} else{
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(CommentOutput{ID: id})
 	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(commentInput)
 }
 
 func DeleteComment(w http.ResponseWriter, r *http.Request) {

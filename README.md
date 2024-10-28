@@ -53,11 +53,10 @@ Headers
 ```headers
 Authorization
 JWT <token> (includes user-id)
-```
-```response
+```json
 {
     "id": 1,
-    "lo": <presigned-url>
+    "presignedURL": <presigned-url>
 }
 ```
 * User immediately gets a presigned url to upload the image
@@ -74,10 +73,9 @@ body
 }
 ```
 ```response
-
-    "id": <id of the post in case of specific post retrieval>
-    "caption": <caption attached with the post>
-    "image_url": <jpg image of the URL>
+    "id": <id of the post in case of specific post retrieval>,
+    "caption": <caption attached with the post>,
+    "image_url": <jpg image of the URL>,
     "comments": [
         {
             "id": <id of the comment>,
@@ -90,12 +88,17 @@ body
 
 ## User comments on a post
 POST /api/posts/{postId}/comments
-```json
+```request
 {
-    "comment": "This is a comment"
+    "comment": "<comment>",
+    "postId": "<id of the post on which to add the comment>"
 }
 ```
-
+```response
+{
+    "id": <id of the comment>,
+}
+```
 
 # Handling image uploads
 * In order to handle the high bandwidth requirement of the image uploads, I decided to use s3 presigned URLs.
